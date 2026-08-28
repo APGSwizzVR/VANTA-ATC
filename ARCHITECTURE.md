@@ -1,46 +1,11 @@
-# VANTA ATC Architecture
+# VANTA ATC architecture
 
-```text
-                  VANTA NETWORK
-                       |
-              +--------+--------+
-              |                 |
-         VANTA Pilot       VANTA ATC
-          Windows app      Windows app
-              |                 |
-          SimConnect       Controller
-              |                 |
-              +--------+--------+
-                       |
-                 VANTA Realtime
-                       |
-              +--------+--------+
-              |                 |
-          Aircraft state      ATC state
-              |                 |
-              +--------+--------+
-                       |
-                  VANTA Voice
-                       |
-             Frequency/radio routing
-```
+`VANTA-ATC` is a separate Windows desktop controller client. It consumes the same realtime network state as VANTA Pilot and registers an ATC position/frequency through the VANTA websocket protocol.
 
-## Aircraft panel
+Pilot telemetry path:
+`MSFS 2020/2024 -> VANTA Pilot/SimConnect -> VANTA realtime -> VANTA ATC`
 
-Selecting an aircraft should expose callsign, registration, aircraft type, latitude/longitude, altitude, speed, heading, vertical speed, squawk, COM1/COM2, departure, arrival, route, simulator and connection state.
+ATC path:
+`VANTA ATC -> DEV/JWT auth -> ATC_CONNECT -> VANTA realtime -> live aircraft + flight plans`
 
-## Position workflow
-
-1. Authenticate.
-2. Request available ATC positions.
-3. Select a position.
-4. Server validates authorization and exclusivity.
-5. Client receives the position frequency and live aircraft stream.
-6. Radio receive/transmit becomes available for that position.
-7. Release the position on disconnect.
-
-## Voice
-
-Voice must be a realtime media path, preferably Opus over an appropriate low-latency transport. REST is not a voice transport.
-
-The server determines eligible receivers. The client only renders audio streams it is authorized to receive.
+The first working vertical slice intentionally focuses on actual aircraft state and flight-plan visibility. Voice media, controller ratings and production JWT login are layered on top after this path is verified.
